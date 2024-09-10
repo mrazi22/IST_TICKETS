@@ -13,17 +13,30 @@ const Signup = () => {
     const [fullName, setFullName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [role,setRole] = useState("customer")
   
     
   
     const signup = (e) => {
       e.preventDefault();
-      axios
-        .post("http://localhost:5000/register", { email, password, fullName })
-        .then((res) => alert(res.data.message))
-        .catch((err) => console.warn(err));
-  
-      navigate("/");
+    
+      // Check required fields
+      if (!email || !password || !fullName) {
+        alert("Please fill in all required fields: email, password, and full name.");
+        return; // Prevent further execution if fields are missing
+      }
+    
+      try {
+        axios
+          .post("http://localhost:5000/register", { email, password, fullName, role })
+          .then((res) => alert(res.data.message))
+          .catch((err) => console.error("Signup Error:", err));
+    
+        navigate("/"); // Redirect to home page on successful signup
+      } catch (error) {
+        console.error("Unexpected Signup Error:", error);
+        alert("An error occurred during signup. Please try again later.");
+      }
     };
   return (
     <Container>
@@ -63,6 +76,17 @@ const Signup = () => {
         />
       </InputContainer>
 
+      <InputContainer>
+      <label htmlFor="role">Role:</label>
+      <input
+        id="role"
+        type="text"
+        value={role}
+        onChange={(e) => setRole(e.target.value)}
+        placeholder="Select Role"
+      />
+      </InputContainer>
+
       <SignUpButton onClick={signup}  >Create Account </SignUpButton>
       <LoginButton onClick={() => navigate("/")}>
       Back to Login
@@ -94,7 +118,7 @@ margin-bottom: -6px;}
 const FormContainer = styled.form`
 border: 1px solid lightgray;
 width: 85%;
-height: 400px;
+height: 450px;
 display: flex;
 flex-direction: column;
 align-items: center;

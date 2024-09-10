@@ -7,8 +7,10 @@ import Checkout from './components/Checkout.js'
 import Address from './components/Address.js'
 import Payment from './components/Payment.js'
 import Successful from './components/Succesful.js'
+import AdminDashboard from './components/adminDashboard.js'
 
 const App = () => {
+
   return (
     <BrowserRouter>
       <Routes>
@@ -19,6 +21,7 @@ const App = () => {
         <Route path='/address' element = {<Address />} />
         <Route path='/payment' element = {<Payment />} />
         <Route path='/successful' element = {<Successful />} />
+        <Route path='/adminDashboard' element = {<AdminDashboard />} />
 
       </Routes>
     </BrowserRouter>

@@ -10,7 +10,7 @@ const secretKey = "your_very_strong_secret_key";
 module.exports = {
     register: async (req, res, next) => {
       try {
-        const { fullName, email, password } = req.body;
+        const { fullName, email, password,role } = req.body;
   
         // Validate the request body using the validation schema
         await authSchema.validateAsync(req.body);
@@ -29,6 +29,7 @@ module.exports = {
           fullName,
           email,
           password: encryptedPassword,
+          role
         });
   
         // Use async/await for concise error handling
@@ -46,13 +47,13 @@ module.exports = {
   
     login: async (req, res, next) => {
       try {
-        const { email, password } = req.body;
+        const { email, password,role } = req.body;
   
         // Validate the request body using the validation schema
         await loginSchema.validateAsync(req.body);
   
         // Find the user by email
-        const user = await User.findOne({ email: email });
+        const user = await User.findOne({ email: email, role: role });
   
         if (!user) {
           // Handle user not found scenario (e.g., generic error message for security)
@@ -68,10 +69,21 @@ module.exports = {
         }
   
         // Login successful, generate a JWT token
-        const token = jwt.sign({ userId: user._id }, secretKey, { expiresIn: "1h" });
-  
-        // Send a successful response with the token (consider filtering sensitive user data)
-        res.status(200).json({ message: "Login successful", token, user: { fullName: user.fullName, email: user.email } });
+        // Login successful, check user role and handle accordingly
+       
+    if (user.role === 'admin') {
+      // Generate JWT token with admin privileges (consider role-based access control)
+      const token = jwt.sign({ userId: user._id, role: 'admin' }, secretKey, { expiresIn: "1h" });
+
+      // Send successful response with admin-specific token and user data (filter sensitive fields)
+      res.status(200).json({ message: "Login successful (Admin)", token, user: { fullName: user.fullName, email: user.email, role: user.role } });
+    } else {
+      // Generate JWT token with customer privileges (consider role-based access control)
+      const token = jwt.sign({ userId: user._id, role: 'customer' }, secretKey, { expiresIn: "1h" });
+
+      // Send successful response with customer-specific token and user data (filter sensitive fields)
+      res.status(200).json({ message: "Login successful (Customer)", token, user: { fullName: user.fullName, email: user.email, role: user.role } });
+    }
       } catch (error) {
         next(error); // Forward the error to the error handler middleware
       }

@@ -1,4 +1,4 @@
-import React ,{useState} from 'react'
+import React ,{useState,useEffect} from 'react'
 import styled from "styled-components";
 import { TbTicket,TbMovie } from 'react-icons/tb';
 import { useNavigate } from "react-router-dom";
@@ -13,37 +13,53 @@ const Login = () => {
   
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState("customer");
 
   const [{}, dispatch] = useStateValue();
 
-  const login = async (e) => {
-    e.preventDefault();
-  
-   
-    try {
-      const response = await axios.post("http://localhost:5000/login", {
-        email,
-        password,
+  const [response, setResponse] = useState(null); // To store login response
+
+// ... other code
+
+const login = async (e) => {
+  e.preventDefault();
+
+  try {
+    const response = await axios.post("http://localhost:5000/login", {
+      email,
+      password,
+      role, // Assuming you're sending the role in the request body
+    });
+    setResponse(response); // Update response state
+    if (response.data.error) {
+      // Handle server-side login error (e.g., invalid credentials)
+      alert(response.data.error); // Or display a more user-friendly error message
+    } else {
+      dispatch({
+        type: "SET_USER",
+        user: response.data,
       });
-  
-      if (response.data.error) {
-        // Handle server-side login error (e.g., invalid credentials)
-        alert(response.data.error); // Or display a more user-friendly error message
-      } else {
-        dispatch({
-          type: "SET_USER",
-          user: response.data,
-        });
-        localStorage.setItem("user", JSON.stringify(response.data));
-        navigate("/home");
-      }
-     
-    } catch (error) {
-      // Handle potential network or other errors
-      console.error("Login Error:", error);
-      alert("An error occurred during login. Please try again later."); // Or display a more informative message
+      localStorage.setItem("user", JSON.stringify(response.data));
     }
-  };
+  } catch (error) {
+    console.error("Login Error:", error);
+    alert("An error occurred during login."); // Or display a more informative message
+  }
+};
+
+useEffect(() => {
+  if (response && response.data) { // Check for response and data
+    if (response.role === 'admin') {
+      navigate("/adminDashboard");
+    } else {
+      navigate("/home");
+    }
+  }
+}, [response]); // Dependency on response state
+  
+ 
+  
+  
 
   return (
     <Container>
@@ -73,6 +89,16 @@ const Login = () => {
            
           />
         </InputContainer>
+        <InputContainer>
+      <label htmlFor="role">Role:</label>
+      <input
+        id="role"
+        type="text"
+        value={role}
+        onChange={(e) => setRole(e.target.value)}
+        placeholder="Select Role"
+      />
+      </InputContainer>
 
         <LoginButton  onClick={login} >Login</LoginButton>
 
@@ -115,7 +141,7 @@ margin-bottom: -6px;
 const FormContainer = styled.div`
 border: 1px solid lightgray;
 width: 75%;
-height: 400px;
+height: 450px;
 display: flex;
 flex-direction: column;
 align-items: center;
