@@ -1,6 +1,8 @@
 const express = require("express");
 const cors = require("cors");
 const userRoutes = require("./Routes/userRoutes");
+const products = require("./Routes/ProductRoutes");
+const orderRoutes = require("./Routes/orderRoutes");
 
 require('dotenv').config()
 require('./helpers/init_mongodb')
@@ -14,7 +16,8 @@ app.use(cors({
 
 
 app.use(userRoutes)
-
+app.use(products)
+app.use(orderRoutes)
 
 
 

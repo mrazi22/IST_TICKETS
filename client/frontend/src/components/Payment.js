@@ -5,9 +5,29 @@ import {getBasketTotal} from "./Reducer"
 import { useStateValue } from './StateProvider'
 import { useNavigate } from 'react-router-dom'
 import Navbar from './Navbar'
+import axios from 'axios'
 const Payment = () => {
-    const [{address,basket},dispatch] = useStateValue()
+  const [{ address, basket, user }, dispatch] = useStateValue();
     const navigate = useNavigate()
+
+    function  payment () {
+      try {
+        axios.post("http://localhost:5000/addorder", {
+          basket: basket,
+          price: getBasketTotal(basket),
+          email: user?.email,
+         
+        });
+        dispatch({
+          type: "EMPTY_BASKET",
+        });
+        navigate("/successful");
+      } catch (error) {
+        console.log(error);
+      }
+
+      
+    }
   return (
     <Container>
     <Navbar />
@@ -68,7 +88,7 @@ const Payment = () => {
           prefix={"ksh. "}
         />
 
-        <button onClick={() => navigate("/successful")} >Place Order</button>
+        <button onClick={payment} >Place Order</button>
       </Subtotal>
     </Main>
   </Container>
